@@ -21,10 +21,10 @@ Static site deployed to GitHub Pages that replays chess games using PGN files wi
 - Load PGN from a file input instead of hardcoding it
 - Load PGN from a query string parameter, with a share button to copy the URL
 - Clicking the header navigates back to the start, discarding query state
+- Material imbalance display (captured pieces + value differential) shown between each clock and the board
 
 ## Roadmap
 
-- Material imbalance indicator (e.g. "+5" next to a player's clock when up a rook)
 - Bookmarklet for launching playback from chess sites
 - Sound effects for move, capture, castle, check, and checkmate
 - Update the homepage to explain what this is for and why one might be interested in using it

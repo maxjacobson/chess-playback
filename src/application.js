@@ -23,6 +23,34 @@ function formatClock(seconds) {
   return `${mins}:${secs.toString().padStart(2, "0")}`;
 }
 
+const PIECE_VALUES = { p: 1, n: 3, b: 3, r: 5, q: 9 };
+const PIECE_SYMBOLS = { p: "♟", n: "♞", b: "♝", r: "♜", q: "♛" };
+const STARTING_COUNTS = { p: 8, n: 2, b: 2, r: 2, q: 1 };
+
+function computeImbalance(fen) {
+  const onBoard = { w: { p:0, n:0, b:0, r:0, q:0 }, b: { p:0, n:0, b:0, r:0, q:0 } };
+  for (const ch of fen.split(" ")[0]) {
+    const lower = ch.toLowerCase();
+    if ("pnbrq".includes(lower)) onBoard[ch === lower ? "b" : "w"][lower]++;
+  }
+  const captured = { w: {}, b: {} };
+  let whiteTotal = 0, blackTotal = 0;
+  for (const piece of "pnbrq") {
+    captured.w[piece] = STARTING_COUNTS[piece] - onBoard.b[piece];
+    captured.b[piece] = STARTING_COUNTS[piece] - onBoard.w[piece];
+    whiteTotal += onBoard.w[piece] * PIECE_VALUES[piece];
+    blackTotal += onBoard.b[piece] * PIECE_VALUES[piece];
+  }
+  return { captured, advantage: whiteTotal - blackTotal };
+}
+
+function updateCaptures(piecesEl, advantageEl, captured, advantagePoints) {
+  let pieces = "";
+  for (const piece of "pnbrq") pieces += PIECE_SYMBOLS[piece].repeat(captured[piece] || 0);
+  piecesEl.textContent = pieces;
+  advantageEl.textContent = advantagePoints > 0 ? `+${advantagePoints}` : "";
+}
+
 async function compress(text) {
   const stream = new Blob([text]).stream().pipeThrough(new CompressionStream("deflate-raw"));
   const buffer = await new Response(stream).arrayBuffer();
@@ -53,6 +81,12 @@ const clockTop = document.getElementById("clock-top");
 const clockBottom = document.getElementById("clock-bottom");
 const clockTopTime = clockTop.querySelector(".clock-time");
 const clockBottomTime = clockBottom.querySelector(".clock-time");
+const capturesTop = document.getElementById("captures-top");
+const capturesTopPieces = capturesTop.querySelector(".captures-pieces");
+const capturesTopAdvantage = capturesTop.querySelector(".captures-advantage");
+const capturesBottom = document.getElementById("captures-bottom");
+const capturesBottomPieces = capturesBottom.querySelector(".captures-pieces");
+const capturesBottomAdvantage = capturesBottom.querySelector(".captures-advantage");
 const resultBanner = document.getElementById("result-banner");
 const shareButton = document.getElementById("share");
 let flipped = false;
@@ -89,6 +123,7 @@ document.getElementById("pgn-file").addEventListener("change", (e) => {
     params.set("pgn", compressed);
     params.set("orientation", "white");
     history.replaceState(null, "", "?" + params.toString());
+    if (currentGame) currentGame.stop();
     fileInputArea.hidden = true;
     container.hidden = false;
     startGame(pgn, "white");
@@ -140,10 +175,12 @@ function startGame(pgn, orientation = "white") {
   chess.reset();
   flipped = orientation === "black";
   cg.set({ fen: chess.fen(), orientation });
+  let currentImbalance = computeImbalance(chess.fen());
   let moveIndex = 0;
   let whiteSeconds = timeControlSeconds;
   let blackSeconds = timeControlSeconds;
   let tickInterval = null;
+  let nextMoveTimeout = null;
   let activeColor = null;
   let lastTickTime = null;
 
@@ -167,6 +204,7 @@ function startGame(pgn, orientation = "white") {
   function updateClockDisplay() {
     const white = formatClock(whiteSeconds);
     const black = formatClock(blackSeconds);
+    const { captured, advantage } = currentImbalance;
     if (flipped) {
       clockTop.querySelector(".player-name").textContent = whiteName;
       clockBottom.querySelector(".player-name").textContent = blackName;
@@ -174,6 +212,8 @@ function startGame(pgn, orientation = "white") {
       clockBottomTime.textContent = black;
       clockTop.className = "clock clock-white";
       clockBottom.className = "clock clock-black";
+      updateCaptures(capturesTopPieces, capturesTopAdvantage, captured.w, advantage > 0 ? advantage : 0);
+      updateCaptures(capturesBottomPieces, capturesBottomAdvantage, captured.b, advantage < 0 ? -advantage : 0);
     } else {
       clockTop.querySelector(".player-name").textContent = blackName;
       clockBottom.querySelector(".player-name").textContent = whiteName;
@@ -181,6 +221,8 @@ function startGame(pgn, orientation = "white") {
       clockBottomTime.textContent = white;
       clockTop.className = "clock clock-black";
       clockBottom.className = "clock clock-white";
+      updateCaptures(capturesTopPieces, capturesTopAdvantage, captured.b, advantage < 0 ? -advantage : 0);
+      updateCaptures(capturesBottomPieces, capturesBottomAdvantage, captured.w, advantage > 0 ? advantage : 0);
     }
   }
 
@@ -216,6 +258,14 @@ function startGame(pgn, orientation = "white") {
     activeColor = null;
   }
 
+  function stop() {
+    stopTicking();
+    if (nextMoveTimeout !== null) {
+      clearTimeout(nextMoveTimeout);
+      nextMoveTimeout = null;
+    }
+  }
+
   function startTicking(color) {
     stopTicking();
     activeColor = color;
@@ -243,6 +293,7 @@ function startGame(pgn, orientation = "white") {
     chess.move(move.san);
     cg.move(move.from, move.to);
     cg.set({ fen: chess.fen() });
+    currentImbalance = computeImbalance(chess.fen());
 
     if (clocks[moveIndex] !== null) {
       if (move.color === "w") {
@@ -260,14 +311,13 @@ function startGame(pgn, orientation = "white") {
     if (moveIndex < moves.length) {
       const nextColor = move.color === "w" ? "b" : "w";
       startTicking(nextColor);
-      setTimeout(playNextMove, getThinkTimeMs(moveIndex));
+      nextMoveTimeout = setTimeout(playNextMove, getThinkTimeMs(moveIndex));
     } else {
       stopTicking();
     }
   }
 
-  // Expose updateClockDisplay for the flip button
-  currentGame = { updateClockDisplay };
+  currentGame = { updateClockDisplay, stop };
 
   updateClockDisplay();
   playNextMove();
