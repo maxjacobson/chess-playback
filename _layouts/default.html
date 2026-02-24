@@ -4,6 +4,12 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{{ page.title | default: site.title }}</title>
+  <link rel="icon" href="{{ '/assets/favicon.svg' | relative_url }}" type="image/svg+xml">
+  <meta property="og:title" content="{{ site.title }}">
+  <meta property="og:description" content="Replay your chess games with clocks">
+  <meta property="og:image" content="{{ '/assets/preview.svg' | absolute_url }}">
+  <meta property="og:type" content="website">
+  <meta name="twitter:card" content="summary_large_image">
   <link rel="stylesheet" href="{{ '/assets/chessground.base.css' | relative_url }}">
   <link rel="stylesheet" href="{{ '/assets/board.css' | relative_url }}">
 </head>

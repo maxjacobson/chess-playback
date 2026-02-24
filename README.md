@@ -22,6 +22,7 @@ Static site deployed to GitHub Pages that replays chess games using PGN files wi
 - Load PGN from a query string parameter, with a share button to copy the URL
 - Clicking the header navigates back to the start, discarding query state
 - Material imbalance display (captured pieces + value differential) shown between each clock and the board
+- Favicon and OG preview image
 
 ## Roadmap
 
