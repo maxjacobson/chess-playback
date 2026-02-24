@@ -5390,6 +5390,16 @@
   var flipped = false;
   var whiteName = chess.header()["White"] || "White";
   var blackName = chess.header()["Black"] || "Black";
+  var termination = chess.header()["Termination"] || null;
+  var resultBanner = document.getElementById("result-banner");
+  function updateResultBanner() {
+    if (moveIndex >= moves.length && termination) {
+      resultBanner.textContent = termination;
+      resultBanner.hidden = false;
+    } else {
+      resultBanner.hidden = true;
+    }
+  }
   function updateClockDisplay() {
     const white = formatClock(whiteSeconds);
     const black = formatClock(blackSeconds);
@@ -5457,6 +5467,7 @@
     }
     updateClockDisplay();
     moveIndex++;
+    updateResultBanner();
     if (moveIndex < moves.length) {
       const nextColor = move3.color === "w" ? "b" : "w";
       startTicking(nextColor);

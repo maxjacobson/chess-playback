@@ -89,9 +89,22 @@ const clockTopTime = clockTop.querySelector(".clock-time");
 const clockBottomTime = clockBottom.querySelector(".clock-time");
 let flipped = false;
 
-// Set player names from PGN headers
+// Game metadata from PGN headers
 const whiteName = chess.header()["White"] || "White";
 const blackName = chess.header()["Black"] || "Black";
+const termination = chess.header()["Termination"] || null;
+
+// Result banner
+const resultBanner = document.getElementById("result-banner");
+
+function updateResultBanner() {
+  if (moveIndex >= moves.length && termination) {
+    resultBanner.textContent = termination;
+    resultBanner.hidden = false;
+  } else {
+    resultBanner.hidden = true;
+  }
+}
 
 function updateClockDisplay() {
   const white = formatClock(whiteSeconds);
@@ -169,6 +182,8 @@ function playNextMove() {
   updateClockDisplay();
 
   moveIndex++;
+
+  updateResultBanner();
 
   // Start ticking the next player's clock and delay by their think time
   if (moveIndex < moves.length) {
