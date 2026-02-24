@@ -7,3 +7,4 @@ vendor/
 node_modules/
 tmp/
 assets/chessground.base.css
+assets/application.js
