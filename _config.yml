@@ -1,0 +1,14 @@
+title: Chess Playback
+baseurl: /chess-playback
+exclude:
+  - Gemfile
+  - Gemfile.lock
+  - node_modules
+  - vendor
+  - package.json
+  - package-lock.json
+  - run-pty.json
+  - bin
+  - src
+  - CLAUDE.md
+  - README.md

@@ -1,0 +1,10 @@
+[
+  {
+    "command": ["bin/jekyll", "serve", "--watch"],
+    "title": "jekyll"
+  },
+  {
+    "command": ["node_modules/.bin/esbuild", "src/application.js", "--bundle", "--outfile=assets/application.js", "--watch"],
+    "title": "esbuild"
+  }
+]
