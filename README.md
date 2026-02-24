@@ -24,6 +24,8 @@ Static site deployed to GitHub Pages that replays chess games using PGN files wi
 - Material imbalance display (captured pieces + value differential) shown between each clock and the board
 - Favicon and OG preview image
 - Replaced separate loading screen with a "Load game" button alongside flip and share
+- Material imbalance display folded into the clock bar (two-line layout)
+- Piece SVGs used for captured pieces instead of Unicode characters
 
 ## Roadmap
 

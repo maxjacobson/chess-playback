@@ -1,6 +1,7 @@
 title: Chess Playback
 url: https://maxjacobson.github.io
 baseurl: /chess-playback
+asset_version: 1
 exclude:
   - Gemfile
   - Gemfile.lock

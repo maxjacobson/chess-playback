@@ -72,31 +72,41 @@ body {
 }
 
 #clock-top {
-  margin-bottom: 2px;
+  margin-bottom: 4px;
 }
 
 #clock-bottom {
-  margin-top: 2px;
+  margin-top: 4px;
 }
 
-.captures {
-  width: 400px;
-  min-height: 2rem;
-  padding: 2px 16px;
-  box-sizing: border-box;
+.clock {
+  align-items: flex-start;
+}
+
+.clock-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.clock-captures {
   display: flex;
   align-items: center;
   gap: 6px;
-  color: #9090b0;
 }
 
 .captures-pieces {
-  font-size: 1.5rem;
-  line-height: 1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px;
+}
+
+.captures-pieces img {
+  width: 1.3rem;
+  height: 1.3rem;
 }
 
 .captures-advantage {
-  font-family: sans-serif;
   font-size: 1rem;
 }
 

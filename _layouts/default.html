@@ -10,11 +10,12 @@
   <meta property="og:image" content="{{ '/assets/preview.svg' | absolute_url }}">
   <meta property="og:type" content="website">
   <meta name="twitter:card" content="summary_large_image">
-  <link rel="stylesheet" href="{{ '/assets/chessground.base.css' | relative_url }}">
-  <link rel="stylesheet" href="{{ '/assets/board.css' | relative_url }}">
+  <meta name="baseurl" content="{{ site.baseurl }}">
+  <link rel="stylesheet" href="{{ '/assets/chessground.base.css' | relative_url }}?v={{ site.asset_version }}">
+  <link rel="stylesheet" href="{{ '/assets/board.css' | relative_url }}?v={{ site.asset_version }}">
 </head>
 <body>
   {{ content }}
-  <script src="{{ '/assets/application.js' | relative_url }}"></script>
+  <script src="{{ '/assets/application.js' | relative_url }}?v={{ site.asset_version }}"></script>
 </body>
 </html>
