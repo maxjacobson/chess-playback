@@ -5,3 +5,5 @@ _site/
 vendor/
 .bundle/
 node_modules/
+tmp/
+assets/chessground.base.css

@@ -15,3 +15,15 @@ Static site deployed to GitHub Pages that replays chess games using PGN files wi
 - **SSG**: Jekyll (Ruby)
 - **JS bundling**: esbuild
 - **JS entry point**: `src/application.js` → `assets/application.js`
+
+## Roadmap
+
+- Material imbalance indicator (e.g. "+5" next to a player's clock when up a rook)
+- Load PGN from a file
+- Load PGN from a query string parameter
+- Bookmarklet for launching playback from chess sites
+- Page layout and design improvements
+
+## Acknowledgments
+
+Inspired by [chess-replay](https://chess-replay.joren.co/).

@@ -2,10 +2,14 @@
   "name": "chess-playback",
   "private": true,
   "scripts": {
-    "build": "esbuild src/application.js --bundle --outfile=assets/application.js"
+    "build": "esbuild src/application.js --bundle --outfile=assets/application.js && cp node_modules/@lichess-org/chessground/assets/chessground.base.css assets/chessground.base.css"
   },
   "devDependencies": {
     "esbuild": "^0.27.3",
     "run-pty": "^6.0.2"
+  },
+  "dependencies": {
+    "@lichess-org/chessground": "^10.0.2",
+    "chess.js": "^1.4.0"
   }
 }
