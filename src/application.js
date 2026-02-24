@@ -29,11 +29,10 @@ async function compress(text) {
   const bytes = new Uint8Array(buffer);
   let binary = "";
   for (let i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]);
-  return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=/g, "");
+  return btoa(binary);
 }
 
-async function decompress(base64url) {
-  const base64 = base64url.replace(/-/g, "+").replace(/_/g, "/");
+async function decompress(base64) {
   const bytes = Uint8Array.from(atob(base64), (c) => c.charCodeAt(0));
   const stream = new Blob([bytes]).stream().pipeThrough(new DecompressionStream("deflate-raw"));
   return await new Response(stream).text();
