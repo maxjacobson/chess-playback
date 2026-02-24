@@ -273,8 +273,8 @@
     var peg$f9 = function(line) {
       return line;
     };
-    var peg$f10 = function(result, comment) {
-      return { result, comment };
+    var peg$f10 = function(result2, comment) {
+      return { result: result2, comment };
     };
     var peg$currPos = options.peg$currPos | 0;
     var peg$posDetailsCache = [{ line: 1, column: 1 }];
@@ -1235,12 +1235,12 @@
     return function() {
       let s0 = BigInt(state & MASK64);
       let s1 = BigInt(state >> 64n & MASK64);
-      const result = wrappingMul(rotl(wrappingMul(s0, 5n), 7n), 9n);
+      const result2 = wrappingMul(rotl(wrappingMul(s0, 5n), 7n), 9n);
       s1 ^= s0;
       s0 = (rotl(s0, 24n) ^ s1 ^ s1 << 16n) & MASK64;
       s1 = rotl(s1, 37n);
       state = s1 << 64n | s0;
-      return result;
+      return result2;
     };
   }
   var rand = xoroshiro128(0xa187eb39cdcaed8f31c4b365b102e01en);
@@ -2943,16 +2943,16 @@
       return move3;
     }
     pgn({ newline = "\n", maxWidth = 0 } = {}) {
-      const result = [];
+      const result2 = [];
       let headerExists = false;
       for (const i in this._header) {
         const headerTag = this._header[i];
         if (headerTag)
-          result.push(`[${i} "${this._header[i]}"]` + newline);
+          result2.push(`[${i} "${this._header[i]}"]` + newline);
         headerExists = true;
       }
       if (headerExists && this._history.length) {
-        result.push(newline);
+        result2.push(newline);
       }
       const appendComment = (moveString2) => {
         const comment = this._comments[this.fen()];
@@ -2994,11 +2994,11 @@
       }
       moves2.push(this._header.Result || "*");
       if (maxWidth === 0) {
-        return result.join("") + moves2.join(" ");
+        return result2.join("") + moves2.join(" ");
       }
       const strip = function() {
-        if (result.length > 0 && result[result.length - 1] === " ") {
-          result.pop();
+        if (result2.length > 0 && result2[result2.length - 1] === " ") {
+          result2.pop();
           return true;
         }
         return false;
@@ -3012,12 +3012,12 @@
             while (strip()) {
               width--;
             }
-            result.push(newline);
+            result2.push(newline);
             width = 0;
           }
-          result.push(token);
+          result2.push(token);
           width += token.length;
-          result.push(" ");
+          result2.push(" ");
           width++;
         }
         if (strip()) {
@@ -3034,19 +3034,19 @@
           }
         }
         if (currentWidth + moves2[i].length > maxWidth && i !== 0) {
-          if (result[result.length - 1] === " ") {
-            result.pop();
+          if (result2[result2.length - 1] === " ") {
+            result2.pop();
           }
-          result.push(newline);
+          result2.push(newline);
           currentWidth = 0;
         } else if (i !== 0) {
-          result.push(" ");
+          result2.push(" ");
           currentWidth++;
         }
-        result.push(moves2[i]);
+        result2.push(moves2[i]);
         currentWidth += moves2[i].length;
       }
-      return result.join("");
+      return result2.join("");
     }
     /**
      * @deprecated Use `setHeader` and `getHeaders` instead. This method will return null header tags (which is not what you want)
@@ -3123,9 +3123,9 @@
         }
         node2 = node2.variations[0];
       }
-      const result = parsedPgn.result;
-      if (result && Object.keys(this._header).length && this._header["Result"] !== result) {
-        this.setHeader("Result", result);
+      const result2 = parsedPgn.result;
+      if (result2 && Object.keys(this._header).length && this._header["Result"] !== result2) {
+        this.setHeader("Result", result2);
       }
     }
     /*
@@ -3441,8 +3441,8 @@
         }
       }
       this._updateCastlingRights();
-      const result = this.getCastlingRights(color);
-      return (rights[KING] === void 0 || rights[KING] === result[KING]) && (rights[QUEEN] === void 0 || rights[QUEEN] === result[QUEEN]);
+      const result2 = this.getCastlingRights(color);
+      return (rights[KING] === void 0 || rights[KING] === result2[KING]) && (rights[QUEEN] === void 0 || rights[QUEEN] === result2[QUEEN]);
     }
     getCastlingRights(color) {
       return {
@@ -3709,18 +3709,18 @@
     return true;
   }
   function baseUserMove(state, orig, dest) {
-    const result = baseMove(state, orig, dest);
-    if (result) {
+    const result2 = baseMove(state, orig, dest);
+    if (result2) {
       state.movable.dests = void 0;
       state.turnColor = opposite(state.turnColor);
       state.animation.current = void 0;
     }
-    return result;
+    return result2;
   }
   function userMove(state, orig, dest) {
     if (canMove(state, orig, dest)) {
-      const result = baseUserMove(state, orig, dest);
-      if (result) {
+      const result2 = baseUserMove(state, orig, dest);
+      if (result2) {
         const holdTime = state.hold.stop();
         unselect(state);
         const metadata = {
@@ -3728,8 +3728,8 @@
           ctrlKey: state.stats.ctrlKey,
           holdTime
         };
-        if (result !== true)
-          metadata.captured = result;
+        if (result2 !== true)
+          metadata.captured = result2;
         callUserFunction(state.movable.events.after, orig, dest, metadata);
         return true;
       }
@@ -3822,11 +3822,11 @@
     const orig = move3[0], dest = move3[1];
     let success = false;
     if (canMove(state, orig, dest)) {
-      const result = baseUserMove(state, orig, dest);
-      if (result) {
+      const result2 = baseUserMove(state, orig, dest);
+      if (result2) {
         const metadata = { premove: true };
-        if (result !== true)
-          metadata.captured = result;
+        if (result2 !== true)
+          metadata.captured = result2;
         callUserFunction(state.movable.events.after, orig, dest, metadata);
         success = true;
       }
@@ -4012,9 +4012,9 @@
   // node_modules/@lichess-org/chessground/dist/anim.js
   var anim = (mutation, state) => state.animation.enabled ? animate(mutation, state) : render(mutation, state);
   function render(mutation, state) {
-    const result = mutation(state);
+    const result2 = mutation(state);
     state.dom.redraw();
-    return result;
+    return result2;
   }
   var makePiece = (key, piece) => ({
     key,
@@ -4082,7 +4082,7 @@
   }
   function animate(mutation, state) {
     const prevPieces = new Map(state.pieces);
-    const result = mutation(state);
+    const result2 = mutation(state);
     const plan = computePlan(prevPieces, state);
     if (plan.anims.size || plan.fadings.size) {
       const alreadyRunning = state.animation.current && state.animation.current.start;
@@ -4096,7 +4096,7 @@
     } else {
       state.dom.redraw();
     }
-    return result;
+    return result2;
   }
   var easing = (t) => t < 0.5 ? 4 * t * t * t : (t - 1) * (2 * t - 2) * (2 * t - 2) + 1;
 
@@ -4434,9 +4434,9 @@
       },
       playPredrop(validate) {
         if (state.predroppable.current) {
-          const result = playPredrop(state, validate);
+          const result2 = playPredrop(state, validate);
           state.dom.redraw();
-          return result;
+          return result2;
         }
         return false;
       },
@@ -5391,10 +5391,24 @@
   var whiteName = chess.header()["White"] || "White";
   var blackName = chess.header()["Black"] || "Black";
   var termination = chess.header()["Termination"] || null;
+  var result = chess.header()["Result"] || null;
   var resultBanner = document.getElementById("result-banner");
   function updateResultBanner() {
-    if (moveIndex >= moves.length && termination) {
-      resultBanner.textContent = termination;
+    if (moveIndex >= moves.length && result) {
+      resultBanner.innerHTML = "";
+      let outcome;
+      if (result === "1-0") outcome = "White wins";
+      else if (result === "0-1") outcome = "Black wins";
+      else outcome = "Draw";
+      const line1 = document.createElement("div");
+      line1.textContent = `${outcome} (${result})`;
+      resultBanner.appendChild(line1);
+      if (termination) {
+        const line2 = document.createElement("div");
+        line2.textContent = termination;
+        line2.className = "result-detail";
+        resultBanner.appendChild(line2);
+      }
       resultBanner.hidden = false;
     } else {
       resultBanner.hidden = true;

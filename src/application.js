@@ -93,13 +93,29 @@ let flipped = false;
 const whiteName = chess.header()["White"] || "White";
 const blackName = chess.header()["Black"] || "Black";
 const termination = chess.header()["Termination"] || null;
+const result = chess.header()["Result"] || null;
 
 // Result banner
 const resultBanner = document.getElementById("result-banner");
 
 function updateResultBanner() {
-  if (moveIndex >= moves.length && termination) {
-    resultBanner.textContent = termination;
+  if (moveIndex >= moves.length && result) {
+    resultBanner.innerHTML = "";
+    let outcome;
+    if (result === "1-0") outcome = "White wins";
+    else if (result === "0-1") outcome = "Black wins";
+    else outcome = "Draw";
+
+    const line1 = document.createElement("div");
+    line1.textContent = `${outcome} (${result})`;
+    resultBanner.appendChild(line1);
+
+    if (termination) {
+      const line2 = document.createElement("div");
+      line2.textContent = termination;
+      line2.className = "result-detail";
+      resultBanner.appendChild(line2);
+    }
     resultBanner.hidden = false;
   } else {
     resultBanner.hidden = true;

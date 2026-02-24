@@ -22,7 +22,6 @@ Static site deployed to GitHub Pages that replays chess games using PGN files wi
 - Load PGN from a file
 - Load PGN from a query string parameter
 - Bookmarklet for launching playback from chess sites
-- Page layout and design improvements
 
 ## Acknowledgments
 

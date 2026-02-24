@@ -30,14 +30,14 @@ body {
 }
 
 .site-footer a {
-  color: #6a6a8a;
+  color: #9090b0;
   font-family: sans-serif;
   font-size: 0.85rem;
   text-decoration: none;
 }
 
 .site-footer a:hover {
-  color: #9090b0;
+  color: #b0b0d0;
 }
 
 .clock {
@@ -86,6 +86,12 @@ body {
   font-family: sans-serif;
   font-size: 0.95rem;
   text-align: center;
+}
+
+.result-detail {
+  font-size: 0.85rem;
+  color: #a0a0b0;
+  margin-top: 4px;
 }
 
 #flip {
