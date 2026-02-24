@@ -2,7 +2,19 @@
 layout: default
 ---
 
-<div id="clock-top">3:00</div>
-<div id="board" style="width: 400px; height: 400px;"></div>
-<div id="clock-bottom">3:00</div>
-<button id="flip" type="button">Flip board</button>
+<h1 class="site-header">Chess Replay</h1>
+<div class="container">
+  <div id="clock-top" class="clock clock-black">
+    <span class="player-name"></span>
+    <span class="clock-time">3:00</span>
+  </div>
+  <div id="board" style="width: 400px; height: 400px;"></div>
+  <div id="clock-bottom" class="clock clock-white">
+    <span class="player-name"></span>
+    <span class="clock-time">3:00</span>
+  </div>
+  <button id="flip" type="button">Flip board</button>
+</div>
+<footer class="site-footer">
+  <a href="https://github.com/maxjacobson/chess-playback">source</a>
+</footer>

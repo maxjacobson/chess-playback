@@ -85,17 +85,31 @@ const cg = Chessground(el, {
 // Clock elements
 const clockTop = document.getElementById("clock-top");
 const clockBottom = document.getElementById("clock-bottom");
+const clockTopTime = clockTop.querySelector(".clock-time");
+const clockBottomTime = clockBottom.querySelector(".clock-time");
 let flipped = false;
+
+// Set player names from PGN headers
+const whiteName = chess.header()["White"] || "White";
+const blackName = chess.header()["Black"] || "Black";
 
 function updateClockDisplay() {
   const white = formatClock(whiteSeconds);
   const black = formatClock(blackSeconds);
   if (flipped) {
-    clockTop.textContent = white;
-    clockBottom.textContent = black;
+    clockTop.querySelector(".player-name").textContent = whiteName;
+    clockBottom.querySelector(".player-name").textContent = blackName;
+    clockTopTime.textContent = white;
+    clockBottomTime.textContent = black;
+    clockTop.className = "clock clock-white";
+    clockBottom.className = "clock clock-black";
   } else {
-    clockTop.textContent = black;
-    clockBottom.textContent = white;
+    clockTop.querySelector(".player-name").textContent = blackName;
+    clockBottom.querySelector(".player-name").textContent = whiteName;
+    clockTopTime.textContent = black;
+    clockBottomTime.textContent = white;
+    clockTop.className = "clock clock-black";
+    clockBottom.className = "clock clock-white";
   }
 }
 
