@@ -2,6 +2,9 @@
 
 Static site deployed to GitHub Pages that replays chess games using PGN files with clock data.
 
+- Production: https://maxjacobson.github.io/chess-playback/
+- Development: http://127.0.0.1:4000/chess-playback/
+
 ## Development
 
 - `bin/dev` — starts Jekyll and esbuild in watch mode via run-pty
