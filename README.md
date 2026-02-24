@@ -16,10 +16,13 @@ Static site deployed to GitHub Pages that replays chess games using PGN files wi
 - **JS bundling**: esbuild
 - **JS entry point**: `src/application.js` → `assets/application.js`
 
+## Changelog
+
+- Load PGN from a file input instead of hardcoding it
+
 ## Roadmap
 
 - Material imbalance indicator (e.g. "+5" next to a player's clock when up a rook)
-- Load PGN from a file
 - Load PGN from a query string parameter
 - Bookmarklet for launching playback from chess sites
 

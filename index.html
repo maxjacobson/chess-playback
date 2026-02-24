@@ -3,7 +3,11 @@ layout: default
 ---
 
 <h1 class="site-header">Chess Replay</h1>
-<div class="container">
+<div class="file-input-area">
+  <label for="pgn-file" class="file-label">Load a PGN file</label>
+  <input type="file" id="pgn-file" accept=".pgn">
+</div>
+<div class="container" hidden>
   <div id="clock-top" class="clock clock-black">
     <span class="player-name"></span>
     <span class="clock-time">3:00</span>

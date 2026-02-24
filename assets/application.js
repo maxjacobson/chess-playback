@@ -255,8 +255,8 @@
     var peg$f3 = function(root, marker) {
       return { root, marker };
     };
-    var peg$f4 = function(comment, moves2) {
-      return lineToTree(rootNode(comment), ...moves2.flat());
+    var peg$f4 = function(comment, moves) {
+      return lineToTree(rootNode(comment), ...moves.flat());
     };
     var peg$f5 = function(san, suffix, nag, comment, variations) {
       return node(san, suffix, nag, comment, variations);
@@ -273,8 +273,8 @@
     var peg$f9 = function(line) {
       return line;
     };
-    var peg$f10 = function(result2, comment) {
-      return { result: result2, comment };
+    var peg$f10 = function(result, comment) {
+      return { result, comment };
     };
     var peg$currPos = options.peg$currPos | 0;
     var peg$posDetailsCache = [{ line: 1, column: 1 }];
@@ -1235,12 +1235,12 @@
     return function() {
       let s0 = BigInt(state & MASK64);
       let s1 = BigInt(state >> 64n & MASK64);
-      const result2 = wrappingMul(rotl(wrappingMul(s0, 5n), 7n), 9n);
+      const result = wrappingMul(rotl(wrappingMul(s0, 5n), 7n), 9n);
       s1 ^= s0;
       s0 = (rotl(s0, 24n) ^ s1 ^ s1 << 16n) & MASK64;
       s1 = rotl(s1, 37n);
       state = s1 << 64n | s0;
-      return result2;
+      return result;
     };
   }
   var rand = xoroshiro128(0xa187eb39cdcaed8f31c4b365b102e01en);
@@ -1275,7 +1275,7 @@
     lan;
     before;
     after;
-    constructor(chess2, internal) {
+    constructor(chess, internal) {
       const { color, piece, from, to, flags, captured, promotion } = internal;
       const fromAlgebraic = algebraic(from);
       const toAlgebraic = algebraic(to);
@@ -1283,12 +1283,12 @@
       this.piece = piece;
       this.from = fromAlgebraic;
       this.to = toAlgebraic;
-      this.san = chess2["_moveToSan"](internal, chess2["_moves"]({ legal: true }));
+      this.san = chess["_moveToSan"](internal, chess["_moves"]({ legal: true }));
       this.lan = fromAlgebraic + toAlgebraic;
-      this.before = chess2.fen();
-      chess2["_makeMove"](internal);
-      this.after = chess2.fen();
-      chess2["_undoMove"]();
+      this.before = chess.fen();
+      chess["_makeMove"](internal);
+      this.after = chess.fen();
+      chess["_undoMove"]();
       this.flags = "";
       for (const flag in BITS) {
         if (BITS[flag] & flags) {
@@ -2079,17 +2079,17 @@
     }
     return { ok: true };
   }
-  function getDisambiguator(move3, moves2) {
+  function getDisambiguator(move3, moves) {
     const from = move3.from;
     const to = move3.to;
     const piece = move3.piece;
     let ambiguities = 0;
     let sameRank = 0;
     let sameFile = 0;
-    for (let i = 0, len = moves2.length; i < len; i++) {
-      const ambigFrom = moves2[i].from;
-      const ambigTo = moves2[i].to;
-      const ambigPiece = moves2[i].piece;
+    for (let i = 0, len = moves.length; i < len; i++) {
+      const ambigFrom = moves[i].from;
+      const ambigTo = moves[i].to;
+      const ambigPiece = moves[i].piece;
       if (piece === ambigPiece && from !== ambigFrom && to === ambigTo) {
         ambiguities++;
         if (rank(from) === rank(ambigFrom)) {
@@ -2111,12 +2111,12 @@
     }
     return "";
   }
-  function addMove(moves2, color, from, to, piece, captured = void 0, flags = BITS.NORMAL) {
+  function addMove(moves, color, from, to, piece, captured = void 0, flags = BITS.NORMAL) {
     const r = rank(to);
     if (piece === PAWN && (r === RANK_1 || r === RANK_8)) {
       for (let i = 0; i < PROMOTIONS.length; i++) {
         const promotion = PROMOTIONS[i];
-        moves2.push({
+        moves.push({
           color,
           from,
           to,
@@ -2127,7 +2127,7 @@
         });
       }
     } else {
-      moves2.push({
+      moves.push({
         color,
         from,
         to,
@@ -2633,17 +2633,17 @@
       return this.isCheckmate() || this.isDraw();
     }
     moves({ verbose = false, square = void 0, piece = void 0 } = {}) {
-      const moves2 = this._moves({ square, piece });
+      const moves = this._moves({ square, piece });
       if (verbose) {
-        return moves2.map((move3) => new Move(this, move3));
+        return moves.map((move3) => new Move(this, move3));
       } else {
-        return moves2.map((move3) => this._moveToSan(move3, moves2));
+        return moves.map((move3) => this._moveToSan(move3, moves));
       }
     }
     _moves({ legal = true, piece = void 0, square = void 0 } = {}) {
       const forSquare = square ? square.toLowerCase() : void 0;
       const forPiece = piece?.toLowerCase();
-      const moves2 = [];
+      const moves = [];
       const us = this._turn;
       const them = swapColor(us);
       let firstSquare = Ox88.a8;
@@ -2672,10 +2672,10 @@
             continue;
           to = from + PAWN_OFFSETS[us][0];
           if (!this._board[to]) {
-            addMove(moves2, us, from, to, PAWN);
+            addMove(moves, us, from, to, PAWN);
             to = from + PAWN_OFFSETS[us][1];
             if (SECOND_RANK[us] === rank(from) && !this._board[to]) {
-              addMove(moves2, us, from, to, PAWN, void 0, BITS.BIG_PAWN);
+              addMove(moves, us, from, to, PAWN, void 0, BITS.BIG_PAWN);
             }
           }
           for (let j = 2; j < 4; j++) {
@@ -2683,9 +2683,9 @@
             if (to & 136)
               continue;
             if (this._board[to]?.color === them) {
-              addMove(moves2, us, from, to, PAWN, this._board[to].type, BITS.CAPTURE);
+              addMove(moves, us, from, to, PAWN, this._board[to].type, BITS.CAPTURE);
             } else if (to === this._epSquare) {
-              addMove(moves2, us, from, to, PAWN, PAWN, BITS.EP_CAPTURE);
+              addMove(moves, us, from, to, PAWN, PAWN, BITS.EP_CAPTURE);
             }
           }
         } else {
@@ -2699,11 +2699,11 @@
               if (to & 136)
                 break;
               if (!this._board[to]) {
-                addMove(moves2, us, from, to, type);
+                addMove(moves, us, from, to, type);
               } else {
                 if (this._board[to].color === us)
                   break;
-                addMove(moves2, us, from, to, type, this._board[to].type, BITS.CAPTURE);
+                addMove(moves, us, from, to, type, this._board[to].type, BITS.CAPTURE);
                 break;
               }
               if (type === KNIGHT || type === KING)
@@ -2718,26 +2718,26 @@
             const castlingFrom = this._kings[us];
             const castlingTo = castlingFrom + 2;
             if (!this._board[castlingFrom + 1] && !this._board[castlingTo] && !this._attacked(them, this._kings[us]) && !this._attacked(them, castlingFrom + 1) && !this._attacked(them, castlingTo)) {
-              addMove(moves2, us, this._kings[us], castlingTo, KING, void 0, BITS.KSIDE_CASTLE);
+              addMove(moves, us, this._kings[us], castlingTo, KING, void 0, BITS.KSIDE_CASTLE);
             }
           }
           if (this._castling[us] & BITS.QSIDE_CASTLE) {
             const castlingFrom = this._kings[us];
             const castlingTo = castlingFrom - 2;
             if (!this._board[castlingFrom - 1] && !this._board[castlingFrom - 2] && !this._board[castlingFrom - 3] && !this._attacked(them, this._kings[us]) && !this._attacked(them, castlingFrom - 1) && !this._attacked(them, castlingTo)) {
-              addMove(moves2, us, this._kings[us], castlingTo, KING, void 0, BITS.QSIDE_CASTLE);
+              addMove(moves, us, this._kings[us], castlingTo, KING, void 0, BITS.QSIDE_CASTLE);
             }
           }
         }
       }
       if (!legal || this._kings[us] === -1) {
-        return moves2;
+        return moves;
       }
       const legalMoves = [];
-      for (let i = 0, len = moves2.length; i < len; i++) {
-        this._makeMove(moves2[i]);
+      for (let i = 0, len = moves.length; i < len; i++) {
+        this._makeMove(moves[i]);
         if (!this._isKingAttacked(us)) {
-          legalMoves.push(moves2[i]);
+          legalMoves.push(moves[i]);
         }
         this._undoMove();
       }
@@ -2750,10 +2750,10 @@
       } else if (move3 === null) {
         moveObj = this._moveFromSan(SAN_NULLMOVE, strict);
       } else if (typeof move3 === "object") {
-        const moves2 = this._moves();
-        for (let i = 0, len = moves2.length; i < len; i++) {
-          if (move3.from === algebraic(moves2[i].from) && move3.to === algebraic(moves2[i].to) && (!("promotion" in moves2[i]) || move3.promotion === moves2[i].promotion)) {
-            moveObj = moves2[i];
+        const moves = this._moves();
+        for (let i = 0, len = moves.length; i < len; i++) {
+          if (move3.from === algebraic(moves[i].from) && move3.to === algebraic(moves[i].to) && (!("promotion" in moves[i]) || move3.promotion === moves[i].promotion)) {
+            moveObj = moves[i];
             break;
           }
         }
@@ -2943,16 +2943,16 @@
       return move3;
     }
     pgn({ newline = "\n", maxWidth = 0 } = {}) {
-      const result2 = [];
+      const result = [];
       let headerExists = false;
       for (const i in this._header) {
         const headerTag = this._header[i];
         if (headerTag)
-          result2.push(`[${i} "${this._header[i]}"]` + newline);
+          result.push(`[${i} "${this._header[i]}"]` + newline);
         headerExists = true;
       }
       if (headerExists && this._history.length) {
-        result2.push(newline);
+        result.push(newline);
       }
       const appendComment = (moveString2) => {
         const comment = this._comments[this.fen()];
@@ -2966,10 +2966,10 @@
       while (this._history.length > 0) {
         reversedHistory.push(this._undoMove());
       }
-      const moves2 = [];
+      const moves = [];
       let moveString = "";
       if (reversedHistory.length === 0) {
-        moves2.push(appendComment(""));
+        moves.push(appendComment(""));
       }
       while (reversedHistory.length > 0) {
         moveString = appendComment(moveString);
@@ -2982,7 +2982,7 @@
           moveString = moveString ? `${moveString} ${prefix}` : prefix;
         } else if (move3.color === "w") {
           if (moveString.length) {
-            moves2.push(moveString);
+            moves.push(moveString);
           }
           moveString = this._moveNumber + ".";
         }
@@ -2990,15 +2990,15 @@
         this._makeMove(move3);
       }
       if (moveString.length) {
-        moves2.push(appendComment(moveString));
+        moves.push(appendComment(moveString));
       }
-      moves2.push(this._header.Result || "*");
+      moves.push(this._header.Result || "*");
       if (maxWidth === 0) {
-        return result2.join("") + moves2.join(" ");
+        return result.join("") + moves.join(" ");
       }
       const strip = function() {
-        if (result2.length > 0 && result2[result2.length - 1] === " ") {
-          result2.pop();
+        if (result.length > 0 && result[result.length - 1] === " ") {
+          result.pop();
           return true;
         }
         return false;
@@ -3012,12 +3012,12 @@
             while (strip()) {
               width--;
             }
-            result2.push(newline);
+            result.push(newline);
             width = 0;
           }
-          result2.push(token);
+          result.push(token);
           width += token.length;
-          result2.push(" ");
+          result.push(" ");
           width++;
         }
         if (strip()) {
@@ -3026,27 +3026,27 @@
         return width;
       };
       let currentWidth = 0;
-      for (let i = 0; i < moves2.length; i++) {
-        if (currentWidth + moves2[i].length > maxWidth) {
-          if (moves2[i].includes("{")) {
-            currentWidth = wrapComment(currentWidth, moves2[i]);
+      for (let i = 0; i < moves.length; i++) {
+        if (currentWidth + moves[i].length > maxWidth) {
+          if (moves[i].includes("{")) {
+            currentWidth = wrapComment(currentWidth, moves[i]);
             continue;
           }
         }
-        if (currentWidth + moves2[i].length > maxWidth && i !== 0) {
-          if (result2[result2.length - 1] === " ") {
-            result2.pop();
+        if (currentWidth + moves[i].length > maxWidth && i !== 0) {
+          if (result[result.length - 1] === " ") {
+            result.pop();
           }
-          result2.push(newline);
+          result.push(newline);
           currentWidth = 0;
         } else if (i !== 0) {
-          result2.push(" ");
+          result.push(" ");
           currentWidth++;
         }
-        result2.push(moves2[i]);
-        currentWidth += moves2[i].length;
+        result.push(moves[i]);
+        currentWidth += moves[i].length;
       }
-      return result2.join("");
+      return result.join("");
     }
     /**
      * @deprecated Use `setHeader` and `getHeaders` instead. This method will return null header tags (which is not what you want)
@@ -3123,9 +3123,9 @@
         }
         node2 = node2.variations[0];
       }
-      const result2 = parsedPgn.result;
-      if (result2 && Object.keys(this._header).length && this._header["Result"] !== result2) {
-        this.setHeader("Result", result2);
+      const result = parsedPgn.result;
+      if (result && Object.keys(this._header).length && this._header["Result"] !== result) {
+        this.setHeader("Result", result);
       }
     }
     /*
@@ -3139,7 +3139,7 @@
      * 4. ... Nge7 is overly disambiguated because the knight on c6 is pinned
      * 4. ... Ne7 is technically the valid SAN
      */
-    _moveToSan(move3, moves2) {
+    _moveToSan(move3, moves) {
       let output = "";
       if (move3.flags & BITS.KSIDE_CASTLE) {
         output = "O-O";
@@ -3149,7 +3149,7 @@
         return SAN_NULLMOVE;
       } else {
         if (move3.piece !== PAWN) {
-          const disambiguator = getDisambiguator(move3, moves2);
+          const disambiguator = getDisambiguator(move3, moves);
           output += move3.piece.toUpperCase() + disambiguator;
         }
         if (move3.flags & (BITS.CAPTURE | BITS.EP_CAPTURE)) {
@@ -3195,10 +3195,10 @@
         return res;
       }
       let pieceType = inferPieceType(cleanMove);
-      let moves2 = this._moves({ legal: true, piece: pieceType });
-      for (let i = 0, len = moves2.length; i < len; i++) {
-        if (cleanMove === strippedSan(this._moveToSan(moves2[i], moves2))) {
-          return moves2[i];
+      let moves = this._moves({ legal: true, piece: pieceType });
+      for (let i = 0, len = moves.length; i < len; i++) {
+        if (cleanMove === strippedSan(this._moveToSan(moves[i], moves))) {
+          return moves[i];
         }
       }
       if (strict) {
@@ -3232,24 +3232,24 @@
         }
       }
       pieceType = inferPieceType(cleanMove);
-      moves2 = this._moves({
+      moves = this._moves({
         legal: true,
         piece: piece ? piece : pieceType
       });
       if (!to) {
         return null;
       }
-      for (let i = 0, len = moves2.length; i < len; i++) {
+      for (let i = 0, len = moves.length; i < len; i++) {
         if (!from) {
-          if (cleanMove === strippedSan(this._moveToSan(moves2[i], moves2)).replace("x", "")) {
-            return moves2[i];
+          if (cleanMove === strippedSan(this._moveToSan(moves[i], moves)).replace("x", "")) {
+            return moves[i];
           }
-        } else if ((!piece || piece.toLowerCase() == moves2[i].piece) && Ox88[from] == moves2[i].from && Ox88[to] == moves2[i].to && (!promotion || promotion.toLowerCase() == moves2[i].promotion)) {
-          return moves2[i];
+        } else if ((!piece || piece.toLowerCase() == moves[i].piece) && Ox88[from] == moves[i].from && Ox88[to] == moves[i].to && (!promotion || promotion.toLowerCase() == moves[i].promotion)) {
+          return moves[i];
         } else if (overlyDisambiguated) {
-          const square = algebraic(moves2[i].from);
-          if ((!piece || piece.toLowerCase() == moves2[i].piece) && Ox88[to] == moves2[i].to && (from == square[0] || from == square[1]) && (!promotion || promotion.toLowerCase() == moves2[i].promotion)) {
-            return moves2[i];
+          const square = algebraic(moves[i].from);
+          if ((!piece || piece.toLowerCase() == moves[i].piece) && Ox88[to] == moves[i].to && (from == square[0] || from == square[1]) && (!promotion || promotion.toLowerCase() == moves[i].promotion)) {
+            return moves[i];
           }
         }
       }
@@ -3279,11 +3279,11 @@
       return s;
     }
     perft(depth) {
-      const moves2 = this._moves({ legal: false });
+      const moves = this._moves({ legal: false });
       let nodes = 0;
       const color = this._turn;
-      for (let i = 0, len = moves2.length; i < len; i++) {
-        this._makeMove(moves2[i]);
+      for (let i = 0, len = moves.length; i < len; i++) {
+        this._makeMove(moves[i]);
         if (!this._isKingAttacked(color)) {
           if (depth - 1 > 0) {
             nodes += this.perft(depth - 1);
@@ -3441,8 +3441,8 @@
         }
       }
       this._updateCastlingRights();
-      const result2 = this.getCastlingRights(color);
-      return (rights[KING] === void 0 || rights[KING] === result2[KING]) && (rights[QUEEN] === void 0 || rights[QUEEN] === result2[QUEEN]);
+      const result = this.getCastlingRights(color);
+      return (rights[KING] === void 0 || rights[KING] === result[KING]) && (rights[QUEEN] === void 0 || rights[QUEEN] === result[QUEEN]);
     }
     getCastlingRights(color) {
       return {
@@ -3709,18 +3709,18 @@
     return true;
   }
   function baseUserMove(state, orig, dest) {
-    const result2 = baseMove(state, orig, dest);
-    if (result2) {
+    const result = baseMove(state, orig, dest);
+    if (result) {
       state.movable.dests = void 0;
       state.turnColor = opposite(state.turnColor);
       state.animation.current = void 0;
     }
-    return result2;
+    return result;
   }
   function userMove(state, orig, dest) {
     if (canMove(state, orig, dest)) {
-      const result2 = baseUserMove(state, orig, dest);
-      if (result2) {
+      const result = baseUserMove(state, orig, dest);
+      if (result) {
         const holdTime = state.hold.stop();
         unselect(state);
         const metadata = {
@@ -3728,8 +3728,8 @@
           ctrlKey: state.stats.ctrlKey,
           holdTime
         };
-        if (result2 !== true)
-          metadata.captured = result2;
+        if (result !== true)
+          metadata.captured = result;
         callUserFunction(state.movable.events.after, orig, dest, metadata);
         return true;
       }
@@ -3822,11 +3822,11 @@
     const orig = move3[0], dest = move3[1];
     let success = false;
     if (canMove(state, orig, dest)) {
-      const result2 = baseUserMove(state, orig, dest);
-      if (result2) {
+      const result = baseUserMove(state, orig, dest);
+      if (result) {
         const metadata = { premove: true };
-        if (result2 !== true)
-          metadata.captured = result2;
+        if (result !== true)
+          metadata.captured = result;
         callUserFunction(state.movable.events.after, orig, dest, metadata);
         success = true;
       }
@@ -4012,9 +4012,9 @@
   // node_modules/@lichess-org/chessground/dist/anim.js
   var anim = (mutation, state) => state.animation.enabled ? animate(mutation, state) : render(mutation, state);
   function render(mutation, state) {
-    const result2 = mutation(state);
+    const result = mutation(state);
     state.dom.redraw();
-    return result2;
+    return result;
   }
   var makePiece = (key, piece) => ({
     key,
@@ -4082,7 +4082,7 @@
   }
   function animate(mutation, state) {
     const prevPieces = new Map(state.pieces);
-    const result2 = mutation(state);
+    const result = mutation(state);
     const plan = computePlan(prevPieces, state);
     if (plan.anims.size || plan.fadings.size) {
       const alreadyRunning = state.animation.current && state.animation.current.start;
@@ -4096,7 +4096,7 @@
     } else {
       state.dom.redraw();
     }
-    return result2;
+    return result;
   }
   var easing = (t) => t < 0.5 ? 4 * t * t * t : (t - 1) * (2 * t - 2) * (2 * t - 2) + 1;
 
@@ -4434,9 +4434,9 @@
       },
       playPredrop(validate) {
         if (state.predroppable.current) {
-          const result2 = playPredrop(state, validate);
+          const result = playPredrop(state, validate);
           state.dom.redraw();
-          return result2;
+          return result;
         }
         return false;
       },
@@ -4881,10 +4881,10 @@
     for (const c of colors)
       element.classList.toggle("orientation-" + c, s.orientation === c);
     element.classList.toggle("manipulable", !s.viewOnly);
-    const container = createEl("cg-container");
-    element.appendChild(container);
+    const container2 = createEl("cg-container");
+    element.appendChild(container2);
     const board = createEl("cg-board");
-    container.appendChild(board);
+    container2.appendChild(board);
     let shapesBelow;
     let shapes;
     let customBelow;
@@ -4894,30 +4894,30 @@
       [shapesBelow, shapes] = ["cg-shapes-below", "cg-shapes"].map((cls) => svgContainer(cls, true));
       [customBelow, custom] = ["cg-custom-below", "cg-custom-svgs"].map((cls) => svgContainer(cls, false));
       autoPieces = createEl("cg-auto-pieces");
-      container.appendChild(shapesBelow);
-      container.appendChild(customBelow);
-      container.appendChild(shapes);
-      container.appendChild(custom);
-      container.appendChild(autoPieces);
+      container2.appendChild(shapesBelow);
+      container2.appendChild(customBelow);
+      container2.appendChild(shapes);
+      container2.appendChild(custom);
+      container2.appendChild(autoPieces);
     }
     if (s.coordinates) {
       const orientClass = s.orientation === "black" ? " black" : "";
       const ranksPositionClass = s.ranksPosition === "left" ? " left" : "";
       if (s.coordinatesOnSquares) {
         const rankN = s.orientation === "white" ? (i) => i + 1 : (i) => 8 - i;
-        files.forEach((f, i) => container.appendChild(renderCoords(ranks.map((r) => f + r), "squares rank" + rankN(i) + orientClass + ranksPositionClass, i % 2 === 0 ? "black" : "white")));
+        files.forEach((f, i) => container2.appendChild(renderCoords(ranks.map((r) => f + r), "squares rank" + rankN(i) + orientClass + ranksPositionClass, i % 2 === 0 ? "black" : "white")));
       } else {
-        container.appendChild(renderCoords(ranks, "ranks" + orientClass + ranksPositionClass, s.ranksPosition === "right" === (s.orientation === "white") ? "white" : "black"));
-        container.appendChild(renderCoords(files, "files" + orientClass, opposite(s.orientation)));
+        container2.appendChild(renderCoords(ranks, "ranks" + orientClass + ranksPositionClass, s.ranksPosition === "right" === (s.orientation === "white") ? "white" : "black"));
+        container2.appendChild(renderCoords(files, "files" + orientClass, opposite(s.orientation)));
       }
     }
     let ghost;
     if (!s.viewOnly && s.draggable.enabled && s.draggable.showGhost) {
       ghost = createEl("piece", "ghost");
       setVisible(ghost, false);
-      container.appendChild(ghost);
+      container2.appendChild(ghost);
     }
-    return { board, container, wrap: element, ghost, shapes, shapesBelow, custom, customBelow, autoPieces };
+    return { board, container: container2, wrap: element, ghost, shapes, shapesBelow, custom, customBelow, autoPieces };
   }
   function svgContainer(cls, isShapes) {
     const svg = setAttributes(createElement("svg"), {
@@ -5145,12 +5145,12 @@
   }
   function updateBounds(s) {
     const bounds = s.dom.elements.wrap.getBoundingClientRect();
-    const container = s.dom.elements.container;
+    const container2 = s.dom.elements.container;
     const ratio = bounds.height / bounds.width;
     const width = Math.floor(bounds.width * window.devicePixelRatio / 8) * 8 / window.devicePixelRatio;
     const height = width * ratio;
-    container.style.width = width + "px";
-    container.style.height = height + "px";
+    container2.style.width = width + "px";
+    container2.style.height = height + "px";
     s.dom.bounds.clear();
     s.addDimensionsCssVarsTo?.style.setProperty("---cg-width", width + "px");
     s.addDimensionsCssVarsTo?.style.setProperty("---cg-height", height + "px");
@@ -5325,20 +5325,6 @@
   }
 
   // src/application.js
-  var PGN = `[Event "Live Chess"]
-[Site "Chess.com"]
-[Date "2026.02.23"]
-[Round "?"]
-[White "bearvssharkfan"]
-[Black "bkcall"]
-[Result "1-0"]
-[TimeControl "180"]
-[WhiteElo "1500"]
-[BlackElo "1506"]
-[Termination "bearvssharkfan won by resignation"]
-
-1. e4 {[%clk 0:02:59.9]} 1... e5 {[%clk 0:02:58.9]} 2. Nf3 {[%clk 0:02:59.3]} 2... Nc6 {[%clk 0:02:58.5]} 3. Bc4 {[%clk 0:02:58.7]} 3... Nf6 {[%clk 0:02:57.8]} 4. Ng5 {[%clk 0:02:57.9]} 4... d5 {[%clk 0:02:56.9]} 5. exd5 {[%clk 0:02:56.5]} 5... Nd4 {[%clk 0:02:54.7]} 6. d6 {[%clk 0:02:52.6]} 6... Qxd6 {[%clk 0:02:52.4]} 7. Nxf7 {[%clk 0:02:50.1]} 7... Qc6 {[%clk 0:02:51.5]} 8. O-O {[%clk 0:02:40.6]} 8... Qxc4 {[%clk 0:02:45.2]} 9. Nxh8 {[%clk 0:02:39.6]} 9... Bg4 {[%clk 0:02:38.7]} 10. f3 {[%clk 0:02:29.4]} 10... Nxc2 {[%clk 0:02:33]} 11. d3 {[%clk 0:02:20.7]} 11... Qc5+ {[%clk 0:02:30.3]} 12. Kh1 {[%clk 0:02:17.3]} 12... Nxa1 {[%clk 0:02:21.7]} 13. fxg4 {[%clk 0:02:15.8]} 13... O-O-O {[%clk 0:02:19.7]} 14. Nc3 {[%clk 0:02:07.2]} 14... Nd5 {[%clk 0:02:15.3]} 15. Ne4 {[%clk 0:02:00.2]} 15... Qb6 {[%clk 0:02:10.4]} 16. Bg5 {[%clk 0:01:53.7]} 16... Be7 {[%clk 0:02:04.3]} 17. Bxe7 {[%clk 0:01:50.8]} 17... Nxe7 {[%clk 0:02:04.2]} 18. Nf7 {[%clk 0:01:49]} 18... Re8 {[%clk 0:01:59.3]} 19. Qxa1 {[%clk 0:01:45.5]} 19... Ng6 {[%clk 0:01:50.4]} 20. g3 {[%clk 0:01:35.9]} 20... Qe3 {[%clk 0:01:41.8]} 21. Qd1 {[%clk 0:01:27.5]} 21... Re7 {[%clk 0:01:38]} 22. Nfg5 {[%clk 0:01:22.3]} 22... Rd7 {[%clk 0:01:35.8]} 23. Re1 {[%clk 0:01:14.8]} 23... Qb6 {[%clk 0:01:31.8]} 24. Nxh7 {[%clk 0:01:01.5]} 24... Qxb2 {[%clk 0:01:29.3]} 25. Qe2 {[%clk 0:00:58.8]} 25... Qd4 {[%clk 0:01:27.5]} 26. Neg5 {[%clk 0:00:55.8]} 26... Qxd3 {[%clk 0:01:25.5]} 27. Qxd3 {[%clk 0:00:55]} 27... Rxd3 {[%clk 0:01:24.8]} 28. Nf7 {[%clk 0:00:53.2]} 28... Rd2 {[%clk 0:01:22.6]} 29. Nxe5 {[%clk 0:00:50.5]} 29... Nxe5 {[%clk 0:01:21.7]} 30. Rxe5 {[%clk 0:00:50.1]} 30... Rxa2 {[%clk 0:01:21]} 31. Ng5 {[%clk 0:00:48.3]} 31... Ra1+ {[%clk 0:01:19.6]} 32. Kg2 {[%clk 0:00:47.3]} 32... Ra2+ {[%clk 0:01:18.9]} 33. Kh3 {[%clk 0:00:46.8]} 33... a5 {[%clk 0:01:17.4]} 34. Re7 {[%clk 0:00:44.7]} 34... b6 {[%clk 0:01:16.4]} 35. Rxg7 {[%clk 0:00:44.1]} 35... Ra1 {[%clk 0:01:14.4]} 36. Ne6 {[%clk 0:00:43.4]} 36... a4 {[%clk 0:01:13.7]} 37. Rxc7+ {[%clk 0:00:42.6]} 37... Kb8 {[%clk 0:01:12.5]} 38. Rc6 {[%clk 0:00:40.9]} 38... Rb1 {[%clk 0:01:11.8]} 39. Nd4 {[%clk 0:00:39.5]} 39... b5 {[%clk 0:01:10.7]} 40. Nc2 {[%clk 0:00:38.2]} 40... b4 {[%clk 0:01:04.7]} 41. Rb6+ {[%clk 0:00:36.4]} 41... Ka7 {[%clk 0:01:02.8]} 42. Rxb4 {[%clk 0:00:35.7]} 42... Rxb4 {[%clk 0:01:02]} 43. Nxb4 {[%clk 0:00:35.6]} 43... Kb6 {[%clk 0:01:01.2]} 44. Na2 {[%clk 0:00:35.1]} 44... Kb5 {[%clk 0:01:00.5]} 45. g5 {[%clk 0:00:34.8]} 45... Kc4 {[%clk 0:00:59]} 46. g6 {[%clk 0:00:34.2]} 46... Kb3 {[%clk 0:00:58.9]} 47. g7 {[%clk 0:00:33.6]} 47... Kxa2 {[%clk 0:00:58.2]} 48. g8=Q+ {[%clk 0:00:33.3]} 48... Kb2 {[%clk 0:00:57.3]} 49. Qb8+ {[%clk 0:00:32.6]} 1-0`;
-  var TIME_CONTROL_SECONDS = 180;
   function parseClockSeconds(clkStr) {
     const match = clkStr.match(/(\d+):(\d+):(\d+\.?\d*)/);
     if (!match) return null;
@@ -5349,28 +5335,6 @@
     const match = comment.match(/\[%clk\s+(\d+:\d+:\d+\.?\d*)\]/);
     if (!match) return null;
     return parseClockSeconds(match[1]);
-  }
-  var chess = new Chess();
-  chess.loadPgn(PGN);
-  var commentsByFen = {};
-  for (const { fen, comment } of chess.getComments()) {
-    commentsByFen[fen] = comment;
-  }
-  var moves = chess.history({ verbose: true });
-  var clocks = moves.map((move3) => extractClockFromComment(commentsByFen[move3.after]));
-  function getThinkTimeMs(moveIndex2) {
-    const currentClock = clocks[moveIndex2];
-    if (currentClock === null) return 1e3;
-    const prevIndex = moveIndex2 - 2;
-    let prevClock;
-    if (prevIndex < 0) {
-      prevClock = TIME_CONTROL_SECONDS;
-    } else {
-      prevClock = clocks[prevIndex];
-      if (prevClock === null) return 1e3;
-    }
-    const thinkTimeMs = (prevClock - currentClock) * 1e3;
-    return Math.max(thinkTimeMs, 300);
   }
   function formatClock(seconds) {
     const mins = Math.floor(seconds / 60);
@@ -5383,119 +5347,163 @@
     animation: { duration: 300 },
     coordinates: false
   });
+  var container = document.querySelector(".container");
+  var fileInputArea = document.querySelector(".file-input-area");
   var clockTop = document.getElementById("clock-top");
   var clockBottom = document.getElementById("clock-bottom");
   var clockTopTime = clockTop.querySelector(".clock-time");
   var clockBottomTime = clockBottom.querySelector(".clock-time");
-  var flipped = false;
-  var whiteName = chess.header()["White"] || "White";
-  var blackName = chess.header()["Black"] || "Black";
-  var termination = chess.header()["Termination"] || null;
-  var result = chess.header()["Result"] || null;
   var resultBanner = document.getElementById("result-banner");
-  function updateResultBanner() {
-    if (moveIndex >= moves.length && result) {
-      resultBanner.innerHTML = "";
-      let outcome;
-      if (result === "1-0") outcome = "White wins";
-      else if (result === "0-1") outcome = "Black wins";
-      else outcome = "Draw";
-      const line1 = document.createElement("div");
-      line1.textContent = `${outcome} (${result})`;
-      resultBanner.appendChild(line1);
-      if (termination) {
-        const line2 = document.createElement("div");
-        line2.textContent = termination;
-        line2.className = "result-detail";
-        resultBanner.appendChild(line2);
-      }
-      resultBanner.hidden = false;
-    } else {
-      resultBanner.hidden = true;
-    }
-  }
-  function updateClockDisplay() {
-    const white = formatClock(whiteSeconds);
-    const black = formatClock(blackSeconds);
-    if (flipped) {
-      clockTop.querySelector(".player-name").textContent = whiteName;
-      clockBottom.querySelector(".player-name").textContent = blackName;
-      clockTopTime.textContent = white;
-      clockBottomTime.textContent = black;
-      clockTop.className = "clock clock-white";
-      clockBottom.className = "clock clock-black";
-    } else {
-      clockTop.querySelector(".player-name").textContent = blackName;
-      clockBottom.querySelector(".player-name").textContent = whiteName;
-      clockTopTime.textContent = black;
-      clockBottomTime.textContent = white;
-      clockTop.className = "clock clock-black";
-      clockBottom.className = "clock clock-white";
-    }
-  }
-  chess.reset();
-  var moveIndex = 0;
-  var whiteSeconds = TIME_CONTROL_SECONDS;
-  var blackSeconds = TIME_CONTROL_SECONDS;
-  var tickInterval = null;
-  var activeColor = null;
-  var lastTickTime = null;
-  function startTicking(color) {
-    stopTicking();
-    activeColor = color;
-    lastTickTime = performance.now();
-    tickInterval = setInterval(() => {
-      const now = performance.now();
-      const elapsed = (now - lastTickTime) / 1e3;
-      lastTickTime = now;
-      if (activeColor === "w") {
-        whiteSeconds = Math.max(0, whiteSeconds - elapsed);
-      } else {
-        blackSeconds = Math.max(0, blackSeconds - elapsed);
-      }
-      updateClockDisplay();
-    }, 100);
-  }
-  function stopTicking() {
-    if (tickInterval !== null) {
-      clearInterval(tickInterval);
-      tickInterval = null;
-    }
-    activeColor = null;
-  }
-  function playNextMove() {
-    if (moveIndex >= moves.length) {
-      stopTicking();
-      return;
-    }
-    const move3 = moves[moveIndex];
-    chess.move(move3.san);
-    cg.move(move3.from, move3.to);
-    cg.set({ fen: chess.fen() });
-    if (clocks[moveIndex] !== null) {
-      if (move3.color === "w") {
-        whiteSeconds = clocks[moveIndex];
-      } else {
-        blackSeconds = clocks[moveIndex];
-      }
-    }
-    updateClockDisplay();
-    moveIndex++;
-    updateResultBanner();
-    if (moveIndex < moves.length) {
-      const nextColor = move3.color === "w" ? "b" : "w";
-      startTicking(nextColor);
-      setTimeout(playNextMove, getThinkTimeMs(moveIndex));
-    } else {
-      stopTicking();
-    }
-  }
-  playNextMove();
+  var flipped = false;
   document.getElementById("flip").addEventListener("click", () => {
     cg.toggleOrientation();
     flipped = !flipped;
-    updateClockDisplay();
+    if (currentGame) currentGame.updateClockDisplay();
   });
+  var currentGame = null;
+  document.getElementById("pgn-file").addEventListener("change", (e) => {
+    const file2 = e.target.files[0];
+    if (!file2) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      fileInputArea.hidden = true;
+      container.hidden = false;
+      startGame(reader.result);
+    };
+    reader.readAsText(file2);
+  });
+  function startGame(pgn2) {
+    const chess = new Chess();
+    chess.loadPgn(pgn2);
+    const commentsByFen = {};
+    for (const { fen, comment } of chess.getComments()) {
+      commentsByFen[fen] = comment;
+    }
+    const moves = chess.history({ verbose: true });
+    const clocks = moves.map((move3) => extractClockFromComment(commentsByFen[move3.after]));
+    const timeControlHeader = chess.header()["TimeControl"];
+    const timeControlSeconds = timeControlHeader ? parseInt(timeControlHeader) || 0 : 0;
+    const whiteName = chess.header()["White"] || "White";
+    const blackName = chess.header()["Black"] || "Black";
+    const termination = chess.header()["Termination"] || null;
+    const result = chess.header()["Result"] || null;
+    chess.reset();
+    cg.set({ fen: chess.fen(), orientation: "white" });
+    flipped = false;
+    let moveIndex = 0;
+    let whiteSeconds = timeControlSeconds;
+    let blackSeconds = timeControlSeconds;
+    let tickInterval = null;
+    let activeColor = null;
+    let lastTickTime = null;
+    function getThinkTimeMs(idx) {
+      const currentClock = clocks[idx];
+      if (currentClock === null) return 1e3;
+      const prevIndex = idx - 2;
+      let prevClock;
+      if (prevIndex < 0) {
+        prevClock = timeControlSeconds;
+      } else {
+        prevClock = clocks[prevIndex];
+        if (prevClock === null) return 1e3;
+      }
+      const thinkTimeMs = (prevClock - currentClock) * 1e3;
+      return Math.max(thinkTimeMs, 300);
+    }
+    function updateClockDisplay() {
+      const white = formatClock(whiteSeconds);
+      const black = formatClock(blackSeconds);
+      if (flipped) {
+        clockTop.querySelector(".player-name").textContent = whiteName;
+        clockBottom.querySelector(".player-name").textContent = blackName;
+        clockTopTime.textContent = white;
+        clockBottomTime.textContent = black;
+        clockTop.className = "clock clock-white";
+        clockBottom.className = "clock clock-black";
+      } else {
+        clockTop.querySelector(".player-name").textContent = blackName;
+        clockBottom.querySelector(".player-name").textContent = whiteName;
+        clockTopTime.textContent = black;
+        clockBottomTime.textContent = white;
+        clockTop.className = "clock clock-black";
+        clockBottom.className = "clock clock-white";
+      }
+    }
+    function updateResultBanner() {
+      if (moveIndex >= moves.length && result) {
+        resultBanner.innerHTML = "";
+        let outcome;
+        if (result === "1-0") outcome = "White wins";
+        else if (result === "0-1") outcome = "Black wins";
+        else outcome = "Draw";
+        const line1 = document.createElement("div");
+        line1.textContent = `${outcome} (${result})`;
+        resultBanner.appendChild(line1);
+        if (termination) {
+          const line2 = document.createElement("div");
+          line2.textContent = termination;
+          line2.className = "result-detail";
+          resultBanner.appendChild(line2);
+        }
+        resultBanner.hidden = false;
+      } else {
+        resultBanner.hidden = true;
+      }
+    }
+    function stopTicking() {
+      if (tickInterval !== null) {
+        clearInterval(tickInterval);
+        tickInterval = null;
+      }
+      activeColor = null;
+    }
+    function startTicking(color) {
+      stopTicking();
+      activeColor = color;
+      lastTickTime = performance.now();
+      tickInterval = setInterval(() => {
+        const now = performance.now();
+        const elapsed = (now - lastTickTime) / 1e3;
+        lastTickTime = now;
+        if (activeColor === "w") {
+          whiteSeconds = Math.max(0, whiteSeconds - elapsed);
+        } else {
+          blackSeconds = Math.max(0, blackSeconds - elapsed);
+        }
+        updateClockDisplay();
+      }, 100);
+    }
+    function playNextMove() {
+      if (moveIndex >= moves.length) {
+        stopTicking();
+        return;
+      }
+      const move3 = moves[moveIndex];
+      chess.move(move3.san);
+      cg.move(move3.from, move3.to);
+      cg.set({ fen: chess.fen() });
+      if (clocks[moveIndex] !== null) {
+        if (move3.color === "w") {
+          whiteSeconds = clocks[moveIndex];
+        } else {
+          blackSeconds = clocks[moveIndex];
+        }
+      }
+      updateClockDisplay();
+      moveIndex++;
+      updateResultBanner();
+      if (moveIndex < moves.length) {
+        const nextColor = move3.color === "w" ? "b" : "w";
+        startTicking(nextColor);
+        setTimeout(playNextMove, getThinkTimeMs(moveIndex));
+      } else {
+        stopTicking();
+      }
+    }
+    currentGame = { updateClockDisplay };
+    updateClockDisplay();
+    playNextMove();
+  }
 })();
 /*! Bundled license information:
 
