@@ -114,7 +114,8 @@ body {
   margin-top: 4px;
 }
 
-#flip {
+#flip,
+#share {
   margin-top: 12px;
   padding: 8px 20px;
   border: none;
@@ -126,8 +127,13 @@ body {
   transition: background 0.15s;
 }
 
-#flip:hover {
+#flip:hover,
+#share:hover {
   background: #50507a;
+}
+
+#share {
+  margin-left: 8px;
 }
 
 cg-board {

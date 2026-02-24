@@ -23,6 +23,22 @@ function formatClock(seconds) {
   return `${mins}:${secs.toString().padStart(2, "0")}`;
 }
 
+async function compress(text) {
+  const stream = new Blob([text]).stream().pipeThrough(new CompressionStream("deflate-raw"));
+  const buffer = await new Response(stream).arrayBuffer();
+  const bytes = new Uint8Array(buffer);
+  let binary = "";
+  for (let i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]);
+  return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=/g, "");
+}
+
+async function decompress(base64url) {
+  const base64 = base64url.replace(/-/g, "+").replace(/_/g, "/");
+  const bytes = Uint8Array.from(atob(base64), (c) => c.charCodeAt(0));
+  const stream = new Blob([bytes]).stream().pipeThrough(new DecompressionStream("deflate-raw"));
+  return await new Response(stream).text();
+}
+
 // Init board
 const el = document.getElementById("board");
 const cg = Chessground(el, {
@@ -39,31 +55,63 @@ const clockBottom = document.getElementById("clock-bottom");
 const clockTopTime = clockTop.querySelector(".clock-time");
 const clockBottomTime = clockBottom.querySelector(".clock-time");
 const resultBanner = document.getElementById("result-banner");
+const shareButton = document.getElementById("share");
 let flipped = false;
+let currentGame = null;
 
 // Flip button
 document.getElementById("flip").addEventListener("click", () => {
   cg.toggleOrientation();
   flipped = !flipped;
   if (currentGame) currentGame.updateClockDisplay();
+  const params = new URLSearchParams(window.location.search);
+  if (params.has("pgn")) {
+    params.set("orientation", flipped ? "black" : "white");
+    history.replaceState(null, "", "?" + params.toString());
+  }
 });
 
-let currentGame = null;
+// Share button
+shareButton.addEventListener("click", async () => {
+  await navigator.clipboard.writeText(window.location.href);
+  shareButton.textContent = "Copied!";
+  setTimeout(() => { shareButton.textContent = "Share"; }, 2000);
+});
 
 // File input
 document.getElementById("pgn-file").addEventListener("change", (e) => {
   const file = e.target.files[0];
   if (!file) return;
   const reader = new FileReader();
-  reader.onload = () => {
+  reader.onload = async () => {
+    const pgn = reader.result;
+    const compressed = await compress(pgn);
+    const params = new URLSearchParams();
+    params.set("pgn", compressed);
+    params.set("orientation", "white");
+    history.replaceState(null, "", "?" + params.toString());
     fileInputArea.hidden = true;
     container.hidden = false;
-    startGame(reader.result);
+    startGame(pgn, "white");
   };
   reader.readAsText(file);
 });
 
-function startGame(pgn) {
+// On page load, check for pgn in query string
+async function init() {
+  const params = new URLSearchParams(window.location.search);
+  const pgnParam = params.get("pgn");
+  if (pgnParam) {
+    const pgn = await decompress(pgnParam);
+    const orientation = params.get("orientation") || "white";
+    fileInputArea.hidden = true;
+    container.hidden = false;
+    startGame(pgn, orientation);
+  }
+}
+init();
+
+function startGame(pgn, orientation = "white") {
   const chess = new Chess();
   chess.loadPgn(pgn);
 
@@ -91,8 +139,8 @@ function startGame(pgn) {
 
   // Playback state
   chess.reset();
-  cg.set({ fen: chess.fen(), orientation: "white" });
-  flipped = false;
+  flipped = orientation === "black";
+  cg.set({ fen: chess.fen(), orientation });
   let moveIndex = 0;
   let whiteSeconds = timeControlSeconds;
   let blackSeconds = timeControlSeconds;
