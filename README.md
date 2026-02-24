@@ -25,7 +25,7 @@ Static site deployed to GitHub Pages that replays chess games using PGN files wi
 - Material imbalance indicator (e.g. "+5" next to a player's clock when up a rook)
 - Load PGN from a query string parameter
 - Bookmarklet for launching playback from chess sites
-- Sound effects for move, capture, castle, and checkmate
+- Sound effects for move, capture, castle, check, and checkmate
 
 ## Acknowledgments
 
