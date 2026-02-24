@@ -27,6 +27,8 @@ Static site deployed to GitHub Pages that replays chess games using PGN files wi
 - Bookmarklet for launching playback from chess sites
 - Sound effects for move, capture, castle, check, and checkmate
 - Update the homepage to explain what this is for and why one might be interested in using it
+- buttons for "pause/resume", "next/previous" (when paused), "first/last" to jump to beginning or end of game (when
+  paused)
 
 ## Acknowledgments
 
