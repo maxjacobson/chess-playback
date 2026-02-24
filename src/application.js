@@ -75,8 +75,6 @@ const cg = Chessground(el, {
 });
 
 // DOM elements
-const container = document.querySelector(".container");
-const fileInputArea = document.querySelector(".file-input-area");
 const clockTop = document.getElementById("clock-top");
 const clockBottom = document.getElementById("clock-bottom");
 const clockTopTime = clockTop.querySelector(".clock-time");
@@ -124,8 +122,6 @@ document.getElementById("pgn-file").addEventListener("change", (e) => {
     params.set("orientation", "white");
     history.replaceState(null, "", "?" + params.toString());
     if (currentGame) currentGame.stop();
-    fileInputArea.hidden = true;
-    container.hidden = false;
     startGame(pgn, "white");
   };
   reader.readAsText(file);
@@ -138,8 +134,6 @@ async function init() {
   if (pgnParam) {
     const pgn = await decompress(pgnParam);
     const orientation = params.get("orientation") || "white";
-    fileInputArea.hidden = true;
-    container.hidden = false;
     startGame(pgn, orientation);
   }
 }
