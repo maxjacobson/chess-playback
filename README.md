@@ -26,6 +26,7 @@ Static site deployed to GitHub Pages that replays chess games using PGN files wi
 - Replaced separate loading screen with a "Load game" button alongside flip and share
 - Material imbalance display folded into the clock bar (two-line layout)
 - Piece SVGs used for captured pieces instead of Unicode characters
+- Share URLs use base64url encoding to avoid percent-encoding that confuses iOS link detection
 
 ## Roadmap
 

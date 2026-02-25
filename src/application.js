@@ -62,14 +62,11 @@ function updateCaptures(piecesEl, advantageEl, captured, capturedColor, advantag
 async function compress(text) {
   const stream = new Blob([text]).stream().pipeThrough(new CompressionStream("deflate-raw"));
   const buffer = await new Response(stream).arrayBuffer();
-  const bytes = new Uint8Array(buffer);
-  let binary = "";
-  for (let i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]);
-  return btoa(binary);
+  return new Uint8Array(buffer).toBase64({ alphabet: "base64url" });
 }
 
-async function decompress(base64) {
-  const bytes = Uint8Array.from(atob(base64), (c) => c.charCodeAt(0));
+async function decompress(base64url) {
+  const bytes = Uint8Array.fromBase64(base64url, { alphabet: "base64url" });
   const stream = new Blob([bytes]).stream().pipeThrough(new DecompressionStream("deflate-raw"));
   return await new Response(stream).text();
 }
