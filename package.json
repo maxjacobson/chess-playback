@@ -5,7 +5,7 @@
     "build": "esbuild src/application.js --bundle --outfile=assets/application.js --minify && cp node_modules/@lichess-org/chessground/assets/chessground.base.css assets/chessground.base.css"
   },
   "devDependencies": {
-    "esbuild": "^0.27.3",
+    "esbuild": "^0.27.4",
     "run-pty": "^6.0.2"
   },
   "dependencies": {
