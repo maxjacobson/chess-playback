@@ -9,7 +9,7 @@
     "run-pty": "^6.0.2"
   },
   "dependencies": {
-    "@lichess-org/chessground": "^10.0.2",
+    "@lichess-org/chessground": "^10.1.0",
     "chess.js": "^1.4.0"
   }
 }
