@@ -5,6 +5,11 @@ Static site deployed to GitHub Pages that replays chess games using PGN files wi
 - Production: https://maxjacobson.github.io/chess-playback/
 - Development: http://127.0.0.1:4000/chess-playback/
 
+> [!NOTE]
+> This is a vibecoded, just for fun little project. I am sure it is very
+> imperfect in many ways, but it's kind of fun to be able to conjure things
+> like this into existence.
+
 ## Development
 
 - `bin/dev` — starts Jekyll and esbuild in watch mode via run-pty
